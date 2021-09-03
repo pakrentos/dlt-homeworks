@@ -1,0 +1,6 @@
+# Specify filepatterns you want git to ignore.
+
+venv
+.DS_store
+*.pyc
+.ipynb_checkpoints
