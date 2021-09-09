@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Web 3 Demo</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js" integrity="sha512-mYc+D+NmmyR0Gcrzyae7q5HguBCS4cBHAsIk7gGhu0/ZyGg4z2YZDjyR2YQA/IMCMTNs4mnlw3vVdERzewpekQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+
+    Web 3 Demo
+    <br >
+    <input id="X_num" type="number" placeholder="First number"></input>
+    <input id="Y_num" type="number" placeholder="Second number"></input>
+    <button onclick="add();">Addition</button>
+    <button onclick="sub();">Subtraction</button>
+    <button onclick="div();">Division</button>
+    <button onclick="mul();">Multiplication</button>
+    <br /><br />
+    Result: <span id="status">0</span>
+
+    <script type="text/javascript">
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+
+        async function loadContract() {
+            return await new window.web3.eth.Contract([
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "X",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "Y",
+                "type": "uint256"
+            }
+        ],
+        "name": "add",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "X",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "Y",
+                "type": "uint256"
+            }
+        ],
+        "name": "div",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "X",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "Y",
+                "type": "uint256"
+            }
+        ],
+        "name": "mul",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "X",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "Y",
+                "type": "uint256"
+            }
+        ],
+        "name": "sub",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+], '0x338F153A7b3066c7200C9d2Bfc1AFC088a482C87');
+        }
+
+        async function add() {
+            const x = Number(document.getElementById('X_num').value);
+            const y = Number(document.getElementById('Y_num').value);
+            const coolNumber = await window.contract.methods.add(x, y).call();
+            updateStatus(`${coolNumber}`);
+        }
+
+        async function sub() {
+            const x = Number(document.getElementById('X_num').value);
+            const y = Number(document.getElementById('Y_num').value);
+            const coolNumber = await window.contract.methods.sub(x, y).call();
+            updateStatus(`${coolNumber}`);
+        }
+
+        async function div() {
+            const x = Number(document.getElementById('X_num').value);
+            const y = Number(document.getElementById('Y_num').value);
+            const coolNumber = await window.contract.methods.div(x, y).call();
+            updateStatus(`${coolNumber}`);
+        }
+
+        async function mul() {
+            const x = Number(document.getElementById('X_num').value);
+            const y = Number(document.getElementById('Y_num').value);
+            const coolNumber = await window.contract.methods.mul(x, y).call();
+            updateStatus(`${coolNumber}`);
+        }
+
+
+        async function getCurrentAccount() {
+            const accounts = await window.web3.eth.getAccounts();
+            return accounts[0];r
+        }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            console.log('Ready!');
+        }
+
+        function updateStatus(status) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = status;
+            console.log(status);
+        }
+
+        load();
+    </script>
+</body>
+
+</html>
