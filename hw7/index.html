@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Web 3 Demo</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js" integrity="sha512-mYc+D+NmmyR0Gcrzyae7q5HguBCS4cBHAsIk7gGhu0/ZyGg4z2YZDjyR2YQA/IMCMTNs4mnlw3vVdERzewpekQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+
+    QA Dapp
+    <br >
+    <div>Answer question:
+    <input id="question_id" type="number" placeholder="Question id"></input>
+    True?
+    <input id="question_answer" type="checkbox" placeholder="Question answer"></input>
+    <button onclick="answer();">Answer!</button>
+    Result: <span id="status"></span>
+    </div>
+    <div>Ask question:
+    <input id="new_question_str" type="string" placeholder="Your question"></input>
+    True? 
+    <input id="new_question_answer" type="checkbox" placeholder="Question answer"></input>
+    <input id="new_question_amount" type="number" placeholder="Question prize (ether)"></input>
+    <button onclick="ask();">Ask!</button>
+    </div>
+    <ul id="thelist"></ul>
+    
+    
+    <br /><br />
+
+    <script type="text/javascript">
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+
+        async function loadContract() {
+            return await new window.web3.eth.Contract([
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "question_id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "answer",
+                "type": "bool"
+            }
+        ],
+        "name": "answerQuestion",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "question_str",
+                "type": "string"
+            },
+            {
+                "internalType": "bool",
+                "name": "answer",
+                "type": "bool"
+            }
+        ],
+        "name": "publishQuestion",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getQuestionsNumber",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "questions",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "question_string",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "weight",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "is_answered",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+], '0x245947dF757Ccb9906Bfa31478ee76b934f6085F');
+        }
+        async function addelement(qid) {
+            const question = await window.contract.methods.questions(qid).call();
+            var completelist= document.getElementById("thelist");
+            completelist.innerHTML += "<li>Question: " + question.question_string + "; Amount: " + question.weight/10e17 + " ether; Answered: " + question.is_answered + "; Question id: " + qid + "</li>";
+        }
+
+        async function loadQuestions() {
+            var completelist= document.getElementById("thelist");
+            completelist.innerHTML = "";
+            const questionsNumber = await window.contract.methods.getQuestionsNumber().call();
+            for(i=0; i<questionsNumber; i++){
+                await addelement(i);
+            }
+        }
+
+        async function answer() {
+            const qid = document.getElementById("question_id").value;
+            const ans = document.getElementById("question_answer").checked;
+            const acc = await getCurrentAccount();
+            const result = await window.contract.methods.answerQuestion(qid, ans).send({from: acc})
+            const result_block = document.getElementById("status");
+            if(result){
+                result_block.textContent = "You win!";
+            }
+            else{
+                result_block.textContent = "You loose. Poor luck, please don't try this question one more time...";
+            }
+            await loadQuestions();
+        }
+
+
+        async function ask() {
+            const question_str = document.getElementById("new_question_str").value;
+            const question_ans = document.getElementById("new_question_answer").checked;
+            const question_amount = document.getElementById("new_question_amount").value*10e17;
+            const acc = await getCurrentAccount();
+            window.contract.methods.publishQuestion(question_str, question_ans).send({from: acc, value:question_amount});
+            await loadQuestions()
+        }
+
+
+        async function getCurrentAccount() {
+            const accounts = await window.web3.eth.getAccounts();
+            return accounts[0];
+        }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            console.log('Ready!');
+            await loadQuestions();
+        }
+
+        function updateStatus(status) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = status;
+            console.log(status);
+        }
+
+        load();
+    </script>
+</body>
+
+</html>
